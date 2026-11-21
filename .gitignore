@@ -1,0 +1,8 @@
+# Data never goes in the repo (the dataset is mounted at run time)
+dev/
+dev-answer/
+out/
+*.parquet
+__pycache__/
+*.pyc
+.venv/
