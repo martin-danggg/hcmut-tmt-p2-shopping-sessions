@@ -1466,7 +1466,16 @@ fn main() {
         .collect();
     let scratch: Vec<SyncCell<(Vec<u32>, Vec<u32>, Vec<u16>)>> =
         (0..nt).map(|_| SyncCell::new((vec![0; ncamp + 1], vec![0; ncamp + 1], Vec::new()))).collect();
-    par_for(NPART, nt, |t, p| {
+    // biggest partitions first (whales), so no thread starts one at the very end
+    let mut porder: Vec<usize> = (0..NPART).collect();
+    {
+        let sz: Vec<usize> = (0..NPART)
+            .map(|p| sbufs.iter().map(|b| b.get(p).iter().map(|s| s.len()).sum::<usize>()).sum())
+            .collect();
+        porder.sort_by_key(|&p| std::cmp::Reverse(sz[p]));
+    }
+    par_for(NPART, nt, |t, pi| {
+        let p = porder[pi];
         let g = unsafe { gath[t].get() };
         let nev: usize = sbufs.iter().map(|b| b.get(p).iter().map(|s| s.len()).sum::<usize>()).sum();
         g.map.reset(nev / 16 + 64);
