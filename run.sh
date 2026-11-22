@@ -3,6 +3,7 @@
 set -eu
 : "${DATA_DIR:=/data}" "${OUTPUT_DIR:=/output}" "${SCRATCH_DIR:=/scratch}"
 export DATA_DIR OUTPUT_DIR SCRATCH_DIR
-# Read-only root filesystem: everything that wants a temp or home dir gets /scratch.
 export TMPDIR="$SCRATCH_DIR" HOME="$SCRATCH_DIR"
-exec python3 /app/pipeline/pipeline.py
+# Ask glibc malloc for transparent huge pages on big buffers (fewer page faults).
+export GLIBC_TUNABLES=glibc.malloc.hugetlb=1
+exec /app/sessions
